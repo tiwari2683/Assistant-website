@@ -6,11 +6,10 @@ import { LogIn } from 'lucide-react';
 import { signIn, fetchUserAttributes, signOut } from 'aws-amplify/auth';
 
 interface LoginProps {
-    onNavigateToSignup: () => void;
-    onNavigateToForgotPassword: () => void;
+    onNavigateToForgotPassword: () => void; // Removed onNavigateToSignup
 }
 
-export const LoginScreen: React.FC<LoginProps> = ({ onNavigateToSignup, onNavigateToForgotPassword }) => {
+export const LoginScreen: React.FC<LoginProps> = ({ onNavigateToForgotPassword }) => {
     const dispatch = useAppDispatch();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -43,7 +42,7 @@ export const LoginScreen: React.FC<LoginProps> = ({ onNavigateToSignup, onNaviga
                     role: role
                 }));
             } else if (nextStep.signInStep === 'CONFIRM_SIGN_UP') {
-                setError('Please confirm your email before logging in.');
+                setError('Please contact your administrator to confirm your account.');
             }
         } catch (err: any) {
             console.error('Login error:', err);
@@ -95,9 +94,9 @@ export const LoginScreen: React.FC<LoginProps> = ({ onNavigateToSignup, onNaviga
                                 <input type="checkbox" className="rounded text-primary-base" />
                                 <span className="text-type-body">Remember me</span>
                             </label>
-                            <button 
-                                type="button" 
-                                onClick={onNavigateToForgotPassword} 
+                            <button
+                                type="button"
+                                onClick={onNavigateToForgotPassword}
                                 className="text-primary-base font-semibold hover:underline"
                             >
                                 Forgot password?
@@ -109,13 +108,6 @@ export const LoginScreen: React.FC<LoginProps> = ({ onNavigateToSignup, onNaviga
                         </Button>
                     </form>
                 </Card>
-
-                <p className="text-center mt-6 text-type-body text-sm">
-                    Don't have an assistant account?{' '}
-                    <button onClick={onNavigateToSignup} className="text-primary-base font-bold hover:underline">
-                        Request Access
-                    </button>
-                </p>
             </div>
         </div>
     );

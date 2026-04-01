@@ -5,7 +5,6 @@ import { store } from './controllers/store';
 import { useAppSelector, useAppDispatch } from './controllers/hooks';
 import { setAuthSuccess, clearAuth } from './controllers/slices/authSlice';
 import { LoginScreen } from './views/pages/auth/LoginScreen';
-import { SignupScreen } from './views/pages/auth/SignupScreen';
 import { ForgotPasswordScreen } from './views/pages/auth/ForgotPasswordScreen';
 import { Layout } from './views/components/Layout/Layout';
 import Dashboard from './views/pages/dashboard/Dashboard';
@@ -31,7 +30,9 @@ const RequireAuth = ({ children }: { children: React.ReactNode }) => {
 const AppRouter = () => {
   const dispatch = useAppDispatch();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'forgot-password'>('login');
+
+  // Removed 'signup' from the possible authMode states
+  const [authMode, setAuthMode] = useState<'login' | 'forgot-password'>('login');
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
@@ -42,9 +43,9 @@ const AppRouter = () => {
         const role = (attributes['custom:role'] as 'Assistant' | 'Doctor') || 'Assistant';
 
         if (role !== 'Assistant') {
-            await signOut();
-            dispatch(clearAuth());
-            return;
+          await signOut();
+          dispatch(clearAuth());
+          return;
         }
 
         dispatch(setAuthSuccess({
@@ -62,7 +63,11 @@ const AppRouter = () => {
   }, [dispatch]);
 
   if (isInitializing) {
-    return <div className="min-h-screen flex items-center justify-center bg-appBg"><div className="w-8 h-8 border-4 border-[#2563EB] border-t-transparent rounded-full animate-spin"></div></div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-appBg">
+        <div className="w-8 h-8 border-4 border-[#2563EB] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
@@ -71,10 +76,8 @@ const AppRouter = () => {
         <Routes>
           <Route path="*" element={
             authMode === 'login'
-              ? <LoginScreen onNavigateToSignup={() => setAuthMode('signup')} onNavigateToForgotPassword={() => setAuthMode('forgot-password')} />
-              : authMode === 'signup'
-                ? <SignupScreen onNavigateToLogin={() => setAuthMode('login')} />
-                : <ForgotPasswordScreen onNavigateToLogin={() => setAuthMode('login')} />
+              ? <LoginScreen onNavigateToForgotPassword={() => setAuthMode('forgot-password')} />
+              : <ForgotPasswordScreen onNavigateToLogin={() => setAuthMode('login')} />
           } />
         </Routes>
       </BrowserRouter>
