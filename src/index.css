@@ -1,0 +1,63 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  body {
+    @apply bg-appBg text-type-body font-sans antialiased;
+    background-image: radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.05) 0, transparent 50%), 
+                      radial-gradient(at 50% 0%, rgba(16, 185, 129, 0.05) 0, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-type-heading font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-glass rounded-xl;
+  }
+
+  .panel-card {
+    @apply bg-cardBg rounded-xl shadow-glass-sm border border-borderColor p-4 md:p-5 transition-all duration-300 hover:shadow-premium;
+  }
+
+  .input-field {
+    @apply w-full rounded-lg border border-borderColor bg-white/50 px-3 py-1.5 md:py-2 text-xs md:text-sm text-type-contrast outline-none focus:border-primary-base focus:ring-4 focus:ring-primary-base/10 transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-primary-base text-white px-4 py-2 rounded-lg hover:bg-primary-dark shadow-tier-light hover:shadow-tier-medium active:scale-95 transition-all duration-200 font-bold text-xs md:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary-base text-white px-4 py-2 rounded-lg hover:bg-secondary-dark shadow-tier-light hover:shadow-tier-medium active:scale-95 transition-all duration-200 font-bold text-xs md:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2;
+  }
+
+  .tab-button {
+    @apply px-4 py-2 font-bold transition-all duration-300 border-b-2 text-xs uppercase tracking-wider;
+  }
+
+  .tab-button-active {
+    @apply border-primary-base text-primary-base bg-primary-base/5;
+  }
+
+  .tab-button-inactive {
+    @apply border-transparent text-type-body hover:text-type-heading hover:bg-gray-50/50;
+  }
+}
+
+/* Custom Scrollbar for Premium Feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+}
