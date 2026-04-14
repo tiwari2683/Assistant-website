@@ -58,7 +58,25 @@ const Dashboard = () => {
     };
 
     const handleCheckIn = (apt: any) => {
+        // Prevent duplicate Check-Ins if the patient is already in the real waiting room queue!
+        if (apt.patientId && waitingRoomPatients.some((p: any) => p.patientId === apt.patientId)) {
+            alert('This patient is already currently in the Waiting Room queue.');
+            return;
+        }
+
         const draftId = `checkin_${apt.id}`;
+
+        // Check if draft exists (either by draftId or by cloudPatientId)
+        const existingDraft = localDrafts.find(d => d.patientId === draftId || (apt.patientId && d.patientData?.cloudPatientId === apt.patientId));
+        if (existingDraft) {
+            dispatch(loadDraftIntoState(existingDraft));
+            if (apt.patientId) {
+                dispatch(fetchPatientDataThunk(apt.patientId));
+            }
+            navigate(`/visit/${existingDraft.patientId}`);
+            return; // Exit early to avoid overwriting the draft!
+        }
+
         const freshDraft: DraftPatient = {
             patientId: draftId,
             lastUpdatedAt: Date.now(),
@@ -367,12 +385,30 @@ const Dashboard = () => {
                                                 </p>
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={() => handleCheckIn(apt)}
-                                            className="ml-auto px-4 py-1.5 rounded-lg text-slate-600 border border-slate-200 bg-white hover:border-primary-base hover:text-primary-base hover:bg-primary-light/30 font-bold text-xs transition-all shadow-sm shrink-0"
-                                        >
-                                            Check In
-                                        </button>
+                                        {(() => {
+                                            const inWaitingRoom = apt.patientId ? waitingRoomPatients.some((p: any) => p.patientId === apt.patientId) : false;
+                                            const isDraft = localDrafts.some(d => d.patientId === `checkin_${apt.id}` || (apt.patientId && d.patientData?.cloudPatientId === apt.patientId));
+                                            
+                                            if (inWaitingRoom) {
+                                                return (
+                                                    <button disabled className="ml-auto px-4 py-1.5 rounded-lg text-emerald-600 border border-emerald-200 bg-emerald-50 font-bold text-xs transition-all shadow-sm shrink-0 opacity-80 cursor-not-allowed">
+                                                        In Queue
+                                                    </button>
+                                                );
+                                            } else if (isDraft) {
+                                                return (
+                                                    <button onClick={() => handleCheckIn(apt)} className="ml-auto px-4 py-1.5 rounded-lg text-primary-base border border-primary-200 bg-primary-50 hover:bg-primary-light/30 hover:border-primary-base font-bold text-xs transition-all shadow-sm shrink-0">
+                                                        Resume
+                                                    </button>
+                                                );
+                                            } else {
+                                                return (
+                                                    <button onClick={() => handleCheckIn(apt)} className="ml-auto px-4 py-1.5 rounded-lg text-slate-600 border border-slate-200 bg-white hover:border-primary-base hover:text-primary-base hover:bg-primary-light/30 font-bold text-xs transition-all shadow-sm shrink-0">
+                                                        Check In
+                                                    </button>
+                                                );
+                                            }
+                                        })()}
                                     </div>
                                 ))
                             )}

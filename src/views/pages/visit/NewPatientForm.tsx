@@ -7,7 +7,7 @@ import {
     initializeExistingVisit,
     loadDraftIntoState,
 } from '../../../controllers/slices/patientVisitSlice';
-import { initiateVisitThunk, fetchPatientDataThunk } from '../../../controllers/apiThunks';
+import { fetchPatientDataThunk } from '../../../controllers/apiThunks';
 import { BasicTab } from './BasicTab';
 import { ClinicalTab } from './ClinicalTab';
 import { DiagnosisTab } from './DiagnosisTab';
@@ -58,7 +58,7 @@ export const NewPatientForm: React.FC = () => {
     };
 
     const isInitialized = useRef(false);
-    const localSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const localSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const patientVisitStateRef = useRef(patientVisitState);
 
     useEffect(() => {
@@ -111,36 +111,9 @@ export const NewPatientForm: React.FC = () => {
         }
     }, [id, draftId, patientId]); 
 
-    useEffect(() => {
-        // Resolve the best available patient ID in priority order:
-        //   1. cloudPatientId — always a real server-side ID (set by handleCheckIn fix)
-        //   2. patientId      — only if it is NOT a local draft_/checkin_ string
-        //
-        // CRITICAL: We must NEVER call initiateVisitThunk with a local checkin_/draft_
-        // ID. The backend would create a Patient record whose primary key is the local
-        // string, resulting in an orphaned row and a duplicate waiting-room entry on
-        // every subsequent call. For local-only drafts, the visit is created lazily
-        // when the assistant clicks "Send to Doctor" (via autoSaveDraftToCloud Scenario B).
-        const resolvedId = cloudPatientId || (!isLocalDraftId(patientId) ? patientId : null);
-        const hasDemographics = !!basic.fullName;
-
-        if (isInitialized.current && resolvedId && !visitId && !isVisitLocked) {
-            // For existing server patients loaded from the DB, wait for the
-            // demographics to be hydrated (via fetchPatientDataThunk) before
-            // initiating a visit so the visit record has full patient details.
-            const isServerPatient = !isLocalDraftId(resolvedId);
-            if (isServerPatient && !hasDemographics) return;
-
-            dispatch(initiateVisitThunk({
-                patientId: resolvedId,
-                name: basic.fullName,
-                age: basic.age,
-                sex: basic.sex,
-                mobile: basic.mobileNumber,
-                address: basic.address
-            }));
-        }
-    }, [isInitialized.current, patientId, cloudPatientId, visitId, basic.fullName]); 
+    // ❌ REMOVED: immediate initiateVisitThunk call. 
+    // Visit creation is now strictly deferred until the Assistant clicks "Send to Doctor".
+    // ---------------------------------------------------------------------------------- 
 
     useEffect(() => {
         return () => {
